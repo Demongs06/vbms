@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demon's Workshop</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+      :root {
+        /* Primitive Color Tokens */
+        --color-white: rgba(255, 255, 255, 1);
+        --color-black: rgba(0, 0, 0, 1);
+        --color-cream-50: rgba(252, 252, 249, 1);
+        --color-cream-100: rgba(255, 255, 253, 1);
+        --color-gray-200: rgba(245, 245, 245, 1);
+        --color-gray-300: rgba(167, 169, 169, 1);
+        --color-gray-400: rgba(119, 124, 124, 1);
+        --color-slate-500: rgba(98, 108, 113, 1);
+        --color-brown-600: rgba(94, 82, 64, 1);
+        --color-charcoal-700: rgba(31, 33, 33, 1);
+        --color-charcoal-800: rgba(38, 40, 40, 1);
+        --color-slate-900: rgba(19, 52, 59, 1);
+        --color-teal-300: rgba(50, 184, 198, 1);
+        --color-teal-400: rgba(45, 166, 178, 1);
+        --color-teal-500: rgba(33, 128, 141, 1);
+        --color-teal-600: rgba(29, 116, 128, 1);
+        --color-teal-700: rgba(26, 104, 115, 1);
+        --color-teal-800: rgba(41, 150, 161, 1);
+        --color-red-400: rgba(255, 84, 89, 1);
+        --color-red-500: rgba(192, 21, 47, 1);
+        --color-orange-400: rgba(230, 129, 97, 1);
+        --color-orange-500: rgba(168, 75, 47, 1);
+
+        /* RGB versions for opacity control */
+        --color-brown-600-rgb: 94, 82, 64;
+        --color-teal-500-rgb: 33, 128, 141;
+        --color-slate-900-rgb: 19, 52, 59;
+        --color-slate-500-rgb: 98, 108, 113;
+        --color-red-500-rgb: 192, 21, 47;
+        --color-red-400-rgb: 255, 84, 89;
+        --color-orange-500-rgb: 168, 75, 47;
+        --color-orange-400-rgb: 230, 129, 97;
+
+        /* Background color tokens (Light Mode) */
+        --color-bg-1: rgba(59, 130, 246, 0.08);
+        --color-bg-2: rgba(245, 158, 11, 0.08);
+        --color-bg-3: rgba(34, 197, 94, 0.08);
+        --color-bg-4: rgba(239, 68, 68, 0.08);
+        --color-bg-5: rgba(147, 51, 234, 0.08);
+        --color-bg-6: rgba(249, 115, 22, 0.08);
+        --color-bg-7: rgba(236, 72, 153, 0.08);
+        --color-bg-8: rgba(6, 182, 212, 0.08);
+
+        /* Semantic Color Tokens (Light Mode) */
+        --color-background: var(--color-cream-50);
+        --color-surface: var(--color-cream-100);
+        --color-text: var(--color-slate-900);
+        --color-text-secondary: var(--color-slate-500);
+        --color-primary: var(--color-teal-500);
+        --color-primary-hover: var(--color-teal-600);
+        --color-primary-active: var(--color-teal-700);
+        --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
+        --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
+        --color-secondary-active: rgba(var(--color-brown-600-rgb), 0.25);
+        --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+        --color-btn-primary-text: var(--color-cream-50);
+        --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+        --color-card-border-inner: rgba(var(--color-brown-600-rgb), 0.12);
+        --color-error: var(--color-red-500);
+        --color-success: var(--color-teal-500);
+        --color-warning: var(--color-orange-500);
+        --color-info: var(--color-slate-500);
+        --color-focus-ring: rgba(var(--color-teal-500-rgb), 0.4);
+        --color-select-caret: rgba(var(--color-slate-900-rgb), 0.8);
+
+        /* Common style patterns */
+        --focus-ring: 0 0 0 3px var(--color-focus-ring);
+        --focus-outline: 2px solid var(--color-primary);
+        --status-bg-opacity: 0.15;
+        --status-border-opacity: 0.25;
+
+        /* RGB versions for opacity control */
+        --color-success-rgb: 33, 128, 141;
+        --color-error-rgb: 192, 21, 47;
+        --color-warning-rgb: 168, 75, 47;
+        --color-info-rgb: 98, 108, 113;
+
+        /* Typography */
+        --font-family-base: "FKGroteskNeue", "Geist", "Inter", -apple-system,
+          BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        --font-family-mono: "Berkeley Mono", ui-monospace, SFMono-Regular, Menlo,
+          Monaco, Consolas, monospace;
+        --font-size-xs: 11px;
+        --font-size-sm: 12px;
+        --font-size-base: 14px;
+        --font-size-md: 14px;
+        --font-size-lg: 16px;
+        --font-size-xl: 18px;
+        --font-size-2xl: 20px;
+        --font-size-3xl: 24px;
+        --font-size-4xl: 30px;
+        --font-weight-normal: 400;
+        --font-weight-medium: 500;
+        --font-weight-semibold: 550;
+        --font-weight-bold: 600;
+        --line-height-tight: 1.2;
+        --line-height-normal: 1.5;
+        --letter-spacing-tight: -0.01em;
+
+        /* Spacing */
+        --space-0: 0;
+        --space-1: 1px;
+        --space-2: 2px;
+        --space-4: 4px;
+        --space-6: 6px;
+        --space-8: 8px;
+        --space-10: 10px;
+        --space-12: 12px;
+        --space-16: 16px;
+        --space-20: 20px;
+        --space-24: 24px;
+        --space-32: 32px;
+
+        /* Border Radius */
+        --radius-sm: 6px;
+        --radius-base: 8px;
+        --radius-md: 10px;
+        --radius-lg: 12px;
+        --radius-full: 9999px;
+
+        /* Shadows */
+        --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.02);
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04),
+          0 1px 2px rgba(0, 0, 0, 0.02);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04),
+          0 2px 4px -1px rgba(0, 0, 0, 0.02);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04),
+          0 4px 6px -2px rgba(0, 0, 0, 0.02);
+        --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.15),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+
+        /* Animation */
+        --duration-fast: 150ms;
+        --duration-normal: 250ms;
+        --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+
+        /* Layout */
+        --container-sm: 640px;
+        --container-md: 768px;
+        --container-lg: 1024px;
+        --container-xl: 1280px;
+      }
+      .card {
+        width: 700px;
+        background-color: var(--color-surface);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--color-card-border);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+      }
+
+      .control-panel {
+        width: 700px;
+        padding: var(--space-24);
+        border-bottom: 1px solid var(--color-card-border-inner);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-16);
+      }
+
+      .control-row {
+        display: flex;
+        gap: var(--space-16);
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-8);
+        padding: var(--space-12) var(--space-24);
+        background-color: var(--color-primary);
+        color: var(--color-btn-primary-text);
+        border: none;
+        border-radius: var(--radius-base);
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-medium);
+        font-family: var(--font-family-base);
+        cursor: pointer;
+        transition: background-color var(--duration-fast) var(--ease-standard);
+        white-space: nowrap;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--color-primary-hover);
+      }
+
+      .btn-primary:active {
+        background-color: var(--color-primary-active);
+      }
+
+      .btn-primary:focus-visible {
+        outline: var(--focus-outline);
+        outline-offset: 2px;
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .btn-icon {
+        width: 20px;
+        height: 20px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .coordinates {
+        display: flex;
+        gap: var(--space-12);
+        flex: 1;
+        flex-wrap: wrap;
+      }
+
+      .coordinate-box {
+        flex: 1;
+        min-width: 200px;
+        padding: var(--space-12) var(--space-16);
+        background-color: var(--color-secondary);
+        border-radius: var(--radius-base);
+        border: 1px solid var(--color-border);
+      }
+
+      .coordinate-label {
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: var(--space-4);
+      }
+
+      .coordinate-value {
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text);
+        font-family: var(--font-family-mono);
+      }
+
+      .message {
+        padding: var(--space-12) var(--space-16);
+        border-radius: var(--radius-base);
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+        display: flex;
+        align-items: center;
+        gap: var(--space-8);
+      }
+
+      .message-info {
+        background-color: var(--color-bg-1);
+        color: var(--color-info);
+        border: 1px solid rgba(var(--color-info-rgb), 0.2);
+      }
+
+      .message-success {
+        background-color: rgba(var(--color-success-rgb), 0.1);
+        color: var(--color-success);
+        border: 1px solid rgba(var(--color-success-rgb), 0.25);
+      }
+
+      .message-error {
+        background-color: rgba(var(--color-error-rgb), 0.1);
+        color: var(--color-error);
+        border: 1px solid rgba(var(--color-error-rgb), 0.25);
+      }
+
+      .message-loading {
+        background-color: var(--color-bg-2);
+        color: var(--color-text-secondary);
+        border: 1px solid var(--color-border);
+      }
+
+      .map-container {
+        width: auto;
+        height: 300px;
+        position: relative;
+      }
+
+      #map {
+        width: 100%;
+        height: 100%;
+        border-bottom-left-radius: var(--radius-lg);
+        border-bottom-right-radius: var(--radius-lg);
+      }
+
+      .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(var(--color-text-secondary), 0.3);
+        border-radius: 50%;
+        border-top-color: var(--color-primary);
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .leaflet-popup-content-wrapper {
+        background-color: var(--color-surface);
+        color: var(--color-text);
+        border: 1px solid var(--color-card-border);
+        box-shadow: var(--shadow-lg);
+        border-radius: var(--radius-base);
+      }
+
+      .leaflet-popup-tip {
+        background-color: var(--color-surface);
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="">
+      <div class="">
+        <div class="">
+          <button type="button" class="">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+        <div class="flex justify-between px-5 items-center">
+          <ul class="flex gap-12">
+            <li><a href="#home" class="hover:underline">Home</a></li>
+
+            <li><a href="#request" class="hover:underline">Request</a></li>
+            <li>
+              <a href="feedback.html" class="hover:underline">Feedback</a>
+            </li>
+            <li><a href="review.html" class="hover:underline">Reviews</a></li>
+            <li>
+              <a href="user_bill.html" class="hover:underline">Bill Payment</a>
+            </li>
+          </ul>
+          <ul class="">
+            <li>
+              <a href="login_admin.html" class="hover:underline"
+                ><span class=""></span>Admin Login</a
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <section id="home" class="h-screen w-screen relative">
+      <div class="absolute z-0">
+        <img
+          src="/dependancies/img/towtruck.jpg"
+          alt=""
+          srcset=""
+          class="w-screen"
+        />
+      </div>
+      <div
+        class="relative z-10 flex items-center justify-center h-full text-green-700 text-[8vw] font-semibold text-center"
+      >
+        <span class="">home</span>
+      </div>
+    </section>
+
+    <section class="bg-transparent">
+      <div class="z-10 relative text-red-700">
+        <h1 class="text-4xl text-center">About us</h1>
+
+        <div class="text-center justify-center flex">
+          <p class="text-xl w-1/2 h-1/2">
+            Our staff of friendly representatives and knowledgeable technicians
+            have dedicated themselves to providing quality auto repairs. Simply
+            put, when you walk in our doors, we treat you like family. We
+            understand that the process of getting repairs and maintenance done
+            to your car, truck, or SUV can be a hassle. That is why we have
+            dedicated ourselves to customer service satisfaction, as well as
+            insistence on superior quality in the auto repair market. Our goal
+            is to make the whole process of auto repairs as quick, easy, and
+            convenient for you as possible. With our excellent team of
+            long-standing technical professionals, we will have your car fixed
+            and put you back on the road as quickly as we can so that you can
+            get back to the things that matter most.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="request">
+      <h1 class="text-4xl text-center">Request</h1>
+      <div class="z-10 relative left-1/3">
+        <form class="" action="" method="post">
+          <div class="">
+            <span class="text-xl"><b>Full Name :</b></span>
+            <input
+              id="full_name"
+              type="text"
+              class="border text-xl"
+              name="full_name"
+              placeholder="Full Name"
+              required
+            />
+          </div>
+          <br />
+          <div class="">
+            <span class="text-xl"><b>Email :</b></span>
+            <input
+              id="email"
+              type="email"
+              class="border text-xl"
+              name="email"
+              placeholder="Enter a valid email address."
+              required
+            />
+          </div>
+          <br />
+          <div class="">
+            <span class="text-xl"><b>Mobile :</b></span>
+            <input
+              id="mobile"
+              type="tel"
+              class="border text-xl"
+              name="mobile"
+              placeholder="Mobile"
+              required
+            />
+          </div>
+          <br />
+          <div class="flex gap-2">
+            <span class="text-xl"><b>Location :</b></span>
+            <div class="card">
+              <div class="control-panel">
+                <div class="control-row">
+                  <button id="getCurrentLocationBtn" class="btn-primary">
+                    <svg class="btn-icon" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Get Current Location
+                  </button>
+                  <div class="coordinates">
+                    <div class="coordinate-box">
+                      <div class="coordinate-label">Latitude</div>
+                      <div class="coordinate-value" id="latDisplay">-</div>
+                    </div>
+                    <div class="coordinate-box">
+                      <div class="coordinate-label">Longitude</div>
+                      <div class="coordinate-value" id="lngDisplay">-</div>
+                    </div>
+                  </div>
+                </div>
+                <div id="messageContainer"></div>
+              </div>
+              <div class="map-container">
+                <div id="map"></div>
+              </div>
+            </div>
+          </div>
+          <br />
+
+          <button type="submit" name="submit" class="border text-xl">
+            Request
+          </button>
+        </form>
+      </div>
+    </section>
+    <script>
+      // Map configuration from provided data
+      const CONFIG = {
+        defaultCenter: { lat: 20, lng: 0 },
+        defaultZoom: 2,
+        currentLocationZoom: 13,
+        tileLayer: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        attribution: "&copy; OpenStreetMap contributors",
+        geolocationOptions: {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        },
+        messages: {
+          initial:
+            "Click 'Get Current Location' or click anywhere on the map to select a location",
+          loading: "Detecting your location...",
+          success: "Location detected successfully!",
+          errorNotSupported: "Geolocation is not supported by your browser",
+          errorPermissionDenied:
+            "Location permission denied. Please click on the map to select manually.",
+          errorUnavailable:
+            "Location unavailable. Please click on the map to select manually.",
+          errorTimeout:
+            "Location request timed out. Please click on the map to select manually.",
+        },
+      };
+
+      // State management
+      let map;
+      let marker;
+      let currentLat = null;
+      let currentLng = null;
+
+      // Initialize map
+      function initMap() {
+        map = L.map("map").setView(
+          [CONFIG.defaultCenter.lat, CONFIG.defaultCenter.lng],
+          CONFIG.defaultZoom
+        );
+
+        L.tileLayer(CONFIG.tileLayer, {
+          attribution: CONFIG.attribution,
+          maxZoom: 19,
+        }).addTo(map);
+
+        // Add click event to map
+        map.on("click", onMapClick);
+
+        // Show initial message
+        showMessage(CONFIG.messages.initial, "info");
+      }
+
+      // Handle map clicks
+      function onMapClick(e) {
+        const { lat, lng } = e.latlng;
+        setLocation(lat, lng);
+        showMessage(
+          `Location selected: ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+          "success"
+        );
+      }
+
+      // Set location and update marker
+      function setLocation(lat, lng) {
+        currentLat = lat;
+        currentLng = lng;
+
+        // Update coordinates display
+        updateCoordinatesDisplay(lat, lng);
+
+        // Remove existing marker if present
+        if (marker) {
+          map.removeLayer(marker);
+        }
+
+        // Create new draggable marker with custom color
+        marker = L.marker([lat, lng], {
+          draggable: true,
+          icon: L.icon({
+            iconUrl:
+              "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+            shadowUrl:
+              "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41],
+          }),
+        }).addTo(map);
+
+        // Add drag event to marker
+        marker.on("drag", onMarkerDrag);
+        marker.on("dragend", onMarkerDragEnd);
+
+        // Add popup to marker
+        marker
+          .bindPopup(
+            `<strong>Selected Location</strong><br>Lat: ${lat.toFixed(
+              6
+            )}<br>Lng: ${lng.toFixed(6)}`
+          )
+          .openPopup();
+      }
+
+      // Handle marker drag
+      function onMarkerDrag(e) {
+        const { lat, lng } = e.target.getLatLng();
+        currentLat = lat;
+        currentLng = lng;
+        updateCoordinatesDisplay(lat, lng);
+      }
+
+      // Handle marker drag end
+      function onMarkerDragEnd(e) {
+        const { lat, lng } = e.target.getLatLng();
+        marker
+          .getPopup()
+          .setContent(
+            `<strong>Selected Location</strong><br>Lat: ${lat.toFixed(
+              6
+            )}<br>Lng: ${lng.toFixed(6)}`
+          );
+        showMessage(
+          `Location updated: ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+          "success"
+        );
+      }
+
+      // Update coordinates display
+      function updateCoordinatesDisplay(lat, lng) {
+        document.getElementById("latDisplay").textContent = lat.toFixed(6);
+        document.getElementById("lngDisplay").textContent = lng.toFixed(6);
+      }
+
+      // Get current location
+      function getCurrentLocation() {
+        if (!navigator.geolocation) {
+          showMessage(CONFIG.messages.errorNotSupported, "error");
+          return;
+        }
+
+        // Disable button and show loading state
+        const btn = document.getElementById("getCurrentLocationBtn");
+        btn.disabled = true;
+        showMessage(CONFIG.messages.loading, "loading");
+
+        navigator.geolocation.getCurrentPosition(
+          // Success callback
+          (position) => {
+            const { latitude, longitude } = position.coords;
+
+            // Center map on location
+            map.setView([latitude, longitude], CONFIG.currentLocationZoom);
+
+            // Set marker
+            setLocation(latitude, longitude);
+
+            // Show success message
+            showMessage(CONFIG.messages.success, "success");
+
+            // Re-enable button
+            btn.disabled = false;
+          },
+          // Error callback
+          (error) => {
+            let errorMessage;
+            switch (error.code) {
+              case error.PERMISSION_DENIED:
+                errorMessage = CONFIG.messages.errorPermissionDenied;
+                break;
+              case error.POSITION_UNAVAILABLE:
+                errorMessage = CONFIG.messages.errorUnavailable;
+                break;
+              case error.TIMEOUT:
+                errorMessage = CONFIG.messages.errorTimeout;
+                break;
+              default:
+                errorMessage = CONFIG.messages.errorUnavailable;
+            }
+            showMessage(errorMessage, "error");
+            btn.disabled = false;
+          },
+          // Options
+          CONFIG.geolocationOptions
+        );
+      }
+
+      // Show message
+      function showMessage(text, type = "info") {
+        const container = document.getElementById("messageContainer");
+        const iconSvg =
+          type === "loading"
+            ? '<span class="spinner"></span>'
+            : type === "success"
+            ? '<svg class="btn-icon" viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
+            : type === "error"
+            ? '<svg class="btn-icon" viewBox="0 0 24 24" style="width: 16px; height: 16px;"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>'
+            : '<svg class="btn-icon" viewBox="0 0 24 24" style="width: 16px; height: 16px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+
+        container.innerHTML = `
+                <div class="message message-${type}">
+                    ${iconSvg}
+                    <span>${text}</span>
+                </div>
+            `;
+      }
+
+      // Initialize on page load
+      document.addEventListener("DOMContentLoaded", () => {
+        initMap();
+        document
+          .getElementById("getCurrentLocationBtn")
+          .addEventListener("click", getCurrentLocation);
+      });
+    </script>
+  </body>
+</html>
