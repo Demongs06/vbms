@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickFix Vehicle Assistance - 24/7 Breakdown Service</title>
+    <link rel="stylesheet" href="style.css">
+<script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <!-- Customer Navigation -->
+    <nav id="customer-nav" class="customer-nav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">🚗</span>
+                <span class="logo-text">QuickFix</span>
+            </div>
+            <button class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#" data-page="home" class="nav-link active">Home</a></li>
+                <li><a href="#" data-page="request-help" class="nav-link">Request Help</a></li>
+                <li><a href="#" data-page="pay-bill" class="nav-link">Pay Bill</a></li>
+                <li><a href="#" data-page="contact" class="nav-link">Contact</a></li>
+                <li><a href="#" id="adminLoginLink" class="nav-link admin-link">Admin Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Admin Navigation -->
+    <nav id="admin-nav" class="admin-nav hidden">
+        <div class="admin-nav-header">
+            <div class="nav-logo">
+                <span class="logo-icon">🚗</span>
+                <span class="logo-text">QuickFix Admin</span>
+            </div>
+            <button class="admin-nav-toggle" id="adminNavToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <ul class="admin-nav-menu" id="adminNavMenu">
+            <li><a href="#" data-page="admin-dashboard" class="admin-nav-link">📊 Dashboard</a></li>
+            <li><a href="#" data-page="admin-requests" class="admin-nav-link">📋 Requests</a></li>
+            <li><a href="#" data-page="admin-staff" class="admin-nav-link">👥 Staff Management</a></li>
+            <li><a href="#" data-page="admin-bills" class="admin-nav-link">💰 Bills</a></li>
+            <li><a href="#" id="adminLogout" class="admin-nav-link logout-link">🚪 Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content Container -->
+    <div id="main-content" class="main-content">
+        
+        <!-- HOME PAGE -->
+        <div id="home-page" class="page active">
+            <!-- Hero Section -->
+            <section class="hero">
+                <div class="hero-content">
+                    <h1 class="hero-title">24/7 Vehicle Breakdown Assistance</h1>
+                    <p class="hero-subtitle">Fast, reliable help when you need it most. Available across Mumbai and surrounding areas.</p>
+                    <button class="btn btn--primary btn--lg" id="heroRequestBtn">Request Help Now</button>
+                </div>
+            </section>
+
+            <!-- Services Section -->
+            <section class="services">
+                <div class="container">
+                    <h2 class="section-title">Our Services</h2>
+                    <div class="services-grid">
+                        <div class="service-card">
+                            <div class="service-icon">🚛</div>
+                            <h3>Towing</h3>
+                            <p>Professional towing service to the nearest garage or your preferred location.</p>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">🛞</div>
+                            <h3>Flat Tire</h3>
+                            <p>Quick tire replacement and repair services on the spot.</p>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">⚡</div>
+                            <h3>Jump Start</h3>
+                            <p>Battery dead? We'll get you started in minutes.</p>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">⛽</div>
+                            <h3>Fuel Delivery</h3>
+                            <p>Ran out of fuel? We'll deliver it right to your location.</p>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">🔧</div>
+                            <h3>Engine Repair</h3>
+                            <p>Expert mechanics to diagnose and fix engine issues on-site.</p>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">🔋</div>
+                            <h3>Battery Replacement</h3>
+                            <p>Complete battery replacement service with quality batteries.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reviews Section -->
+            <section class="reviews">
+                <div class="container">
+                    <h2 class="section-title">What Our Customers Say</h2>
+                    <div class="reviews-header">
+                        <div class="average-rating">
+                            <div class="rating-number" id="avgRating">4.5</div>
+                            <div class="stars" id="avgStars">★★★★★</div>
+                            <div class="rating-count" id="ratingCount">Based on 2 reviews</div>
+                        </div>
+                    </div>
+                    <div class="reviews-grid" id="reviewsGrid">
+                        <!-- Reviews will be populated by JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="container">
+                    <div class="footer-grid">
+                        <div class="footer-section">
+                            <h4>QuickFix Assistance</h4>
+                            <p>Your trusted partner for vehicle breakdown services across Mumbai.</p>
+                        </div>
+                        <div class="footer-section">
+                            <h4>Contact</h4>
+                            <p>📞 +91 9876543210</p>
+                            <p>📧 support@quickfix.com</p>
+                            <p>📍 Mumbai, Maharashtra</p>
+                        </div>
+                        <div class="footer-section">
+                            <h4>Quick Links</h4>
+                            <p><a href="#" data-page="home">Home</a></p>
+                            <p><a href="#" data-page="request-help">Request Help</a></p>
+                            <p><a href="#" data-page="contact">Contact Us</a></p>
+                        </div>
+                    </div>
+                    <div class="footer-bottom">
+                        <p>&copy; 2025 QuickFix Vehicle Assistance. All rights reserved.</p>
+                    </div>
+                </div>
+            </footer>
+        </div>
+
+        <!-- REQUEST HELP PAGE -->
+        <div id="request-help-page" class="page">
+            <div class="container page-container">
+                <h1 class="page-title">Request Breakdown Assistance</h1>
+                <div class="form-card">
+                    <form id="requestHelpForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="customerName" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Phone Number *</label>
+                                <input type="tel" class="form-control" id="customerPhone" placeholder="+91 XXXXXXXXXX" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Email Address *</label>
+                                <input type="email" class="form-control" id="customerEmail" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Vehicle Type *</label>
+                                <select class="form-control" id="vehicleType" required>
+                                    <option value="">Select vehicle type</option>
+                                    <option value="Car">Car</option>
+                                    <option value="Bike">Bike</option>
+                                    <option value="Truck">Truck</option>
+                                    <option value="Auto">Auto Rickshaw</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Vehicle Number *</label>
+                                <input type="text" class="form-control" id="vehicleNumber" placeholder="MH-02-XX-1234" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Problem Type *</label>
+                                <select class="form-control" id="problemType" required>
+                                    <option value="">Select problem type</option>
+                                    <option value="Oil Leakage">Oil Leakage</option>
+                                    <option value="Breakdown">Breakdown</option>
+                                    <option value="Puncture">Puncture</option>
+                                    <option value="Engine Failure">Engine Failure</option>
+                                    <option value="Battery Issue">Battery Issue</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Problem Description</label>
+                            <textarea class="form-control" id="problemDescription" rows="3" placeholder="Describe the issue in detail..."></textarea>
+                        </div>
+                        
+                        <!-- Location Picker with Leaflet Map -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-xl font-semibold mb-4">Select Your Location</h2>
+                        <div id="requestMap" class="h-96 rounded-lg border border-gray-300 mb-4 z-0"></div>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                                <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50" id="latitude" readonly>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                                <input type="text" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50" id="longitude" readonly>
+                            </div>
+                        </div>
+                        <button type="button" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition" id="useCurrentLocation">📍 Use Current Location</button>
+                        <p class="text-xs text-gray-500 mt-2">Drag the marker to select your exact location</p>
+                    </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn--primary btn--lg">Submit Request</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAY BILL PAGE -->
+        <div id="pay-bill-page" class="page">
+            <div class="container page-container">
+                <h1 class="page-title">Pay Bill</h1>
+                
+                <div id="billSelection" class="form-card">
+                    <h3>Select Your Bill</h3>
+                    <div class="form-group">
+                        <label class="form-label">Enter Request ID</label>
+                        <input type="text" class="form-control" id="billRequestId" placeholder="Enter your request ID (e.g., 1001)">
+                    </div>
+                    <button class="btn btn--primary" id="loadBillBtn">Load Bill</button>
+                </div>
+
+                <div id="billDetails" class="form-card hidden">
+                    <h3>Bill Details</h3>
+                    <div class="bill-info">
+                        <div class="bill-row">
+                            <span>Request ID:</span>
+                            <span id="billId"></span>
+                        </div>
+                        <div class="bill-row">
+                            <span>Customer Name:</span>
+                            <span id="billCustomerName"></span>
+                        </div>
+                        <div class="bill-row">
+                            <span>Service Type:</span>
+                            <span id="billServiceType"></span>
+                        </div>
+                        <div class="bill-row">
+                            <span>Service Date:</span>
+                            <span id="billDate"></span>
+                        </div>
+                        <div class="bill-row">
+                            <span>Base Amount:</span>
+                            <span id="billBaseAmount"></span>
+                        </div>
+                        <div class="bill-row">
+                            <span>Additional Charges:</span>
+                            <span id="billAdditionalCharges"></span>
+                        </div>
+                        <div class="bill-row">
+                            <span>Tax (18% GST):</span>
+                            <span id="billTax"></span>
+                        </div>
+                        <div class="bill-row total">
+                            <span>Total Amount:</span>
+                            <span id="billTotal"></span>
+                        </div>
+                    </div>
+
+                    <form id="paymentForm">
+                        <h4>Payment Details</h4>
+                        <div class="form-group">
+                            <label class="form-label">Payment Method</label>
+                            <select class="form-control" id="paymentMethod" required>
+                                <option value="">Select payment method</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Debit Card">Debit Card</option>
+                                <option value="UPI">UPI</option>
+                                <option value="Net Banking">Net Banking</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Card Number</label>
+                            <input type="text" class="form-control" id="cardNumber" placeholder="XXXX XXXX XXXX XXXX" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Expiry Date</label>
+                                <input type="text" class="form-control" id="expiryDate" placeholder="MM/YY" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">CVV</label>
+                                <input type="text" class="form-control" id="cvv" placeholder="XXX" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn--primary btn--lg">Pay Now</button>
+                    </form>
+                </div>
+
+                <div id="reviewForm" class="form-card hidden">
+                    <h3>Write a Review</h3>
+                    <p>Thank you for your payment! Please share your experience:</p>
+                    <form id="submitReviewForm">
+                        <div class="form-group">
+                            <label class="form-label">Rating</label>
+                            <div class="star-rating" id="starRating">
+                                <span class="star" data-rating="1">☆</span>
+                                <span class="star" data-rating="2">☆</span>
+                                <span class="star" data-rating="3">☆</span>
+                                <span class="star" data-rating="4">☆</span>
+                                <span class="star" data-rating="5">☆</span>
+                            </div>
+                            <input type="hidden" id="reviewRating" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Your Review</label>
+                            <textarea class="form-control" id="reviewText" rows="4" placeholder="Share your experience with our service..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn--primary">Submit Review</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTACT PAGE -->
+        <div id="contact-page" class="page">
+            <div class="container page-container">
+                <h1 class="page-title">Contact Us</h1>
+                <div class="contact-grid">
+                    <div class="contact-info">
+                        <h3>Get in Touch</h3>
+                        <div class="contact-item">
+                            <div class="contact-icon">📞</div>
+                            <div>
+                                <h4>Phone</h4>
+                                <p>+91 9876543210</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">📧</div>
+                            <div>
+                                <h4>Email</h4>
+                                <p>support@quickfix.com</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">📍</div>
+                            <div>
+                                <h4>Address</h4>
+                                <p>Mumbai, Maharashtra, India</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">⏰</div>
+                            <div>
+                                <h4>Working Hours</h4>
+                                <p>24/7 Emergency Service</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN LOGIN PAGE -->
+        <div id="admin-login-page" class="page">
+            <div class="admin-login-container">
+                <div class="login-card">
+                    <div class="login-header">
+                        <span class="logo-icon">🚗</span>
+                        <h2>Admin Login</h2>
+                    </div>
+                    <form id="adminLoginForm">
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" id="adminUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" id="adminPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn--primary btn--full-width">Login</button>
+                    </form>
+                    <p class="login-hint">Default: admin / admin123</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN DASHBOARD -->
+        <div id="admin-dashboard-page" class="page admin-page">
+            <div class="admin-content">
+                <h1 class="page-title">Dashboard Overview</h1>
+                
+                <div class="dashboard-cards">
+                    <div class="dashboard-card" style="background: var(--color-bg-1);">
+                        <div class="dashboard-icon">📋</div>
+                        <div class="dashboard-info">
+                            <div class="dashboard-label">Total Requests</div>
+                            <div class="dashboard-value" id="totalRequests">0</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card" style="background: var(--color-bg-3);">
+                        <div class="dashboard-icon">✅</div>
+                        <div class="dashboard-info">
+                            <div class="dashboard-label">Completed</div>
+                            <div class="dashboard-value" id="completedRequests">0</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card" style="background: var(--color-bg-2);">
+                        <div class="dashboard-icon">⏳</div>
+                        <div class="dashboard-info">
+                            <div class="dashboard-label">Pending</div>
+                            <div class="dashboard-value" id="pendingRequests">0</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card" style="background: var(--color-bg-5);">
+                        <div class="dashboard-icon">👥</div>
+                        <div class="dashboard-info">
+                            <div class="dashboard-label">Total Staff</div>
+                            <div class="dashboard-value" id="totalStaff">0</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card" style="background: var(--color-bg-8);">
+                        <div class="dashboard-icon">💰</div>
+                        <div class="dashboard-info">
+                            <div class="dashboard-label">Total Revenue</div>
+                            <div class="dashboard-value" id="totalRevenue">₹0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Recent Requests</h3>
+                    </div>
+                    <div class="card__body">
+                        <div class="table-container">
+                            <table class="data-table" id="dashboardRequestsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Request ID</th>
+                                        <th>Customer</th>
+                                        <th>Vehicle</th>
+                                        <th>Problem</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN REQUESTS PAGE -->
+        <div id="admin-requests-page" class="page admin-page">
+            <div class="admin-content">
+                <div class="page-header">
+                    <h1 class="page-title">Request Management</h1>
+                    <div class="page-actions">
+                        <select class="form-control" id="requestStatusFilter">
+                            <option value="All">All Requests</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Accepted">Accepted</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card__body">
+                        <div class="table-container">
+                            <table class="data-table" id="requestsTable">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Customer</th>
+                                        <th>Phone</th>
+                                        <th>Vehicle</th>
+                                        <th>Problem</th>
+                                        <th>Location</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN STAFF MANAGEMENT PAGE -->
+        <div id="admin-staff-page" class="page admin-page">
+            <div class="admin-content">
+                <div class="page-header">
+                    <h1 class="page-title">Staff Management</h1>
+                    <button class="btn btn--primary" id="addStaffBtn">+ Add Staff</button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="drivers">Drivers</button>
+                    <button class="tab-btn" data-tab="mechanics">Mechanics</button>
+                </div>
+
+                <div class="tab-content active" id="drivers-tab">
+                    <div class="card">
+                        <div class="card__body">
+                            <div class="table-container">
+                                <table class="data-table" id="driversTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Phone</th>
+                                            <th>Email</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="mechanics-tab">
+                    <div class="card">
+                        <div class="card__body">
+                            <div class="table-container">
+                                <table class="data-table" id="mechanicsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Phone</th>
+                                            <th>Email</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN BILLS PAGE -->
+        <div id="admin-bills-page" class="page admin-page">
+            <div class="admin-content">
+                <h1 class="page-title">Bill Management</h1>
+                
+                <div class="card">
+                    <div class="card__body">
+                        <div class="table-container">
+                            <table class="data-table" id="billsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Bill ID</th>
+                                        <th>Request ID</th>
+                                        <th>Customer</th>
+                                        <th>Service Type</th>
+                                        <th>Amount</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="notification hidden"></div>
+
+    <!-- Modal Container -->
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
