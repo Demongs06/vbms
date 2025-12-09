@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Demon's Workshop - 24/7 Breakdown Service</title>
-    <link rel="stylesheet" href="style.css">
 <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-XnDEC9oy.css">
 </head>
 <body>
     <!-- Customer Navigation -->
@@ -613,23 +613,6 @@
     </div>
 
     <script>
-        const API_BASE = import.meta.env.VITE_API_URL || 'https://vbms-backend-v5o7.onrender.com';
-
-// helper
-async function api(path, method = 'GET', body = null) {
-  const opts = { method, headers: {} };
-  if (body) {
-    opts.headers['Content-Type'] = 'application/json';
-    opts.body = JSON.stringify(body);
-  }
-  const res = await fetch(`${API_BASE}${path}`, opts);
-  if (!res.ok) {
-    const err = await res.json().catch(()=>({error:'unknown'}));
-    throw new Error(err.error || res.statusText);
-  }
-  return res.json();
-}
-
         // Data Storage (In-Memory)
 let customers = [
   { id: 1, name: 'Rajesh Kumar', phone: '+91 9876543210', email: 'rajesh.kumar@email.com' },
@@ -818,25 +801,23 @@ function hideModal() {
 }
 
 // Customer Side Functions
-async function renderReviews() {
-  let reviewsList = [];
-  try {
-    reviewsList = await api('/api/reviews');
-  } catch (err) {
-    showNotification('Failed to load reviews', 'error');
-  }
-
+function renderReviews() {
   const reviewsGrid = document.getElementById('reviewsGrid');
   const avgRatingEl = document.getElementById('avgRating');
   const avgStarsEl = document.getElementById('avgStars');
   const ratingCountEl = document.getElementById('ratingCount');
 
-  const avgRating = reviewsList.length > 0 ? (reviewsList.reduce((s, r) => s + r.rating, 0) / reviewsList.length).toFixed(1) : 0;
+  // Calculate average rating
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : 0;
+
   avgRatingEl.textContent = avgRating;
   avgStarsEl.textContent = '★'.repeat(Math.round(avgRating)) + '☆'.repeat(5 - Math.round(avgRating));
-  ratingCountEl.textContent = `Based on ${reviewsList.length} reviews`;
+  ratingCountEl.textContent = `Based on ${reviews.length} reviews`;
 
-  reviewsGrid.innerHTML = reviewsList.map(review => `
+  // Render reviews
+  reviewsGrid.innerHTML = reviews.map(review => `
     <div class="review-card">
       <div class="review-header">
         <div>
@@ -850,7 +831,6 @@ async function renderReviews() {
     </div>
   `).join('');
 }
-
 
 // Global map instance
 let requestMap = null;
@@ -940,8 +920,9 @@ function initRequestMap() {
   }, 100);
 }
 
-async function handleRequestHelpSubmit(e) {
+function handleRequestHelpSubmit(e) {
   e.preventDefault();
+
   const customerName = document.getElementById('customerName').value;
   const customerPhone = document.getElementById('customerPhone').value;
   const customerEmail = document.getElementById('customerEmail').value;
@@ -952,87 +933,97 @@ async function handleRequestHelpSubmit(e) {
   const latitude = parseFloat(document.getElementById('latitude').value);
   const longitude = parseFloat(document.getElementById('longitude').value);
 
-  try {
-    showNotification('Submitting request...', 'info');
-    const newReq = await api('/api/requests', 'POST', {
-      customerName,
-      customerPhone,
-      customerEmail,
-      vehicleType,
-      vehicleNumber,
-      problemType,
-      description,
-      latitude,
-      longitude
-    });
-
-    showNotification(`Request submitted! Request ID: ${newReq._id}`, 'success');
-    e.target.reset();
-    document.getElementById('latitude').value = '19.0760';
-    document.getElementById('longitude').value = '72.8777';
-    setTimeout(()=> showPage('home'), 1200);
-  } catch (err) {
-    console.error(err);
-    showNotification(`Failed to submit: ${err.message}`, 'error');
+  // Create or find customer
+  let customer = customers.find(c => c.email === customerEmail);
+  if (!customer) {
+    customer = {
+      id: nextCustomerId++,
+      name: customerName,
+      phone: customerPhone,
+      email: customerEmail
+    };
+    customers.push(customer);
   }
+
+  // Create request
+  const request = {
+    id: nextRequestId++,
+    customerId: customer.id,
+    customerName: customerName,
+    phone: customerPhone,
+    vehicleType: vehicleType,
+    vehicleNumber: vehicleNumber,
+    problemType: problemType,
+    description: description,
+    latitude: latitude,
+    longitude: longitude,
+    status: 'Pending',
+    assignedDriver: null,
+    assignedMechanic: null,
+    createdDate: new Date().toISOString().split('T')[0]
+  };
+
+  requests.push(request);
+
+  showNotification(`Request submitted successfully! Your Request ID is: ${request.id}`, 'success');
+  e.target.reset();
+  document.getElementById('latitude').value = '19.0760';
+  document.getElementById('longitude').value = '72.8777';
+  setTimeout(() => showPage('home'), 2000);
 }
 
-        let requestsCache = [];
+function loadBill() {
+  const requestId = parseInt(document.getElementById('billRequestId').value);
+  const request = requests.find(r => r.id === requestId);
 
-async function loadRequests() {
-  try {
-    requestsCache = await api('/api/requests');
-    return requestsCache;
-  } catch (err) {
-    showNotification('Failed to fetch requests', 'error');
-    return [];
+  if (!request) {
+    showNotification('Request not found!', 'error');
+    return;
   }
-}
-        
-async function loadBill() {
-  const requestId = document.getElementById('billRequestId').value.trim();
-  if (!requestId) { showNotification('Enter Request ID', 'error'); return; }
-  try {
-    // fetch request
-    const request = await api(`/api/requests/${requestId}`);
-    if (!request) { showNotification('Request not found', 'error'); return; }
-    if (request.status !== 'Completed') { showNotification('Service not completed yet.', 'warning'); return; }
 
-    // fetch existing bill
-    let bill = await api(`/api/bills/request/${requestId}`);
-    if (!bill) {
-      bill = await api(`/api/bills/generate/${requestId}`, 'POST');
-    }
-
-    currentBillRequestId = requestId;
-    // populate UI using returned bill (IDs use bill._id)
-    document.getElementById('billId').textContent = bill._id;
-    document.getElementById('billCustomerName').textContent = bill.customerName;
-    document.getElementById('billServiceType').textContent = bill.serviceType;
-    document.getElementById('billDate').textContent = bill.createdDate;
-    document.getElementById('billBaseAmount').textContent = '₹' + bill.baseAmount;
-    document.getElementById('billAdditionalCharges').textContent = '₹' + bill.additionalCharges;
-    document.getElementById('billTax').textContent = '₹' + bill.tax;
-    document.getElementById('billTotal').textContent = '₹' + bill.total;
-
-    document.getElementById('billSelection').classList.add('hidden');
-    document.getElementById('billDetails').classList.remove('hidden');
-    // store current bill id for payment
-    currentBillId = bill._id;
-  } catch (err) {
-    showNotification('Error loading bill: ' + err.message, 'error');
+  if (request.status !== 'Completed') {
+    showNotification('Service not completed yet. Cannot generate bill.', 'warning');
+    return;
   }
-}
 
-async function handlePayment(e) {
-  e.preventDefault();
-  try {
-    await api(`/api/bills/${currentBillId}/pay`, 'PATCH');
-    showNotification('Payment successful!', 'success');
-    // ... rest of your UI flow
-  } catch (err) {
-    showNotification('Payment failed', 'error');
+  let bill = bills.find(b => b.requestId === requestId);
+
+  if (!bill) {
+    // Generate new bill
+    const baseAmount = Math.floor(Math.random() * 3000) + 500;
+    const additionalCharges = Math.floor(Math.random() * 500);
+    const tax = Math.round((baseAmount + additionalCharges) * 0.18);
+    const total = baseAmount + additionalCharges + tax;
+
+    bill = {
+      id: nextBillId++,
+      requestId: requestId,
+      customerName: request.customerName,
+      serviceType: request.problemType,
+      baseAmount: baseAmount,
+      additionalCharges: additionalCharges,
+      tax: tax,
+      total: total,
+      status: 'Unpaid',
+      createdDate: new Date().toISOString().split('T')[0]
+    };
+    bills.push(bill);
   }
+
+  currentBillRequestId = requestId;
+
+  // Display bill
+  document.getElementById('billId').textContent = requestId;
+  document.getElementById('billCustomerName').textContent = bill.customerName;
+  document.getElementById('billServiceType').textContent = bill.serviceType;
+  document.getElementById('billDate').textContent = bill.createdDate;
+  document.getElementById('billBaseAmount').textContent = '₹' + bill.baseAmount;
+  document.getElementById('billAdditionalCharges').textContent = '₹' + bill.additionalCharges;
+  document.getElementById('billTax').textContent = '₹' + bill.tax;
+  document.getElementById('billTotal').textContent = '₹' + bill.total;
+
+  document.getElementById('billSelection').classList.add('hidden');
+  document.getElementById('billDetails').classList.remove('hidden');
 }
 
 function handlePayment(e) {
@@ -1048,25 +1039,34 @@ function handlePayment(e) {
   document.getElementById('reviewForm').classList.remove('hidden');
 }
 
-async function handleReviewSubmit(e) {
+function handleReviewSubmit(e) {
   e.preventDefault();
-  try {
-    const requestId = currentBillRequestId; // should be _id from server
-    const request = await api(`/api/requests/${requestId}`);
-    const reviewText = document.getElementById('reviewText').value;
-    const body = {
-      requestId,
-      customerName: request.customerName,
-      rating: selectedRating,
-      reviewText,
-      serviceType: request.problemType
-    };
-    await api('/api/reviews', 'POST', body);
-    showNotification('Thank you for your review!', 'success');
-    // reset UI...
-  } catch (err) {
-    showNotification('Could not submit review', 'error');
-  }
+
+  const request = requests.find(r => r.id === currentBillRequestId);
+  const reviewText = document.getElementById('reviewText').value;
+
+  const review = {
+    id: nextReviewId++,
+    requestId: currentBillRequestId,
+    customerName: request.customerName,
+    rating: selectedRating,
+    reviewText: reviewText,
+    serviceType: request.problemType,
+    createdDate: new Date().toISOString().split('T')[0]
+  };
+
+  reviews.push(review);
+
+  showNotification('Thank you for your review!', 'success');
+  setTimeout(() => {
+    showPage('home');
+    document.getElementById('billSelection').classList.remove('hidden');
+    document.getElementById('billDetails').classList.add('hidden');
+    document.getElementById('reviewForm').classList.add('hidden');
+    document.getElementById('billRequestId').value = '';
+    document.getElementById('reviewText').value = '';
+    selectedRating = 0;
+  }, 2000);
 }
 
 // Admin Side Functions
@@ -1117,9 +1117,10 @@ function renderAdminDashboard() {
   `).join('');
 }
 
-async function renderRequestsTable(filterStatus = 'All') {
-  await loadRequests();
-  const filteredRequests = filterStatus === 'All' ? requestsCache : requestsCache.filter(r => r.status === filterStatus);
+function renderRequestsTable(filterStatus = 'All') {
+  const filteredRequests = filterStatus === 'All'
+    ? requests
+    : requests.filter(r => r.status === filterStatus);
 
   const tbody = document.querySelector('#requestsTable tbody');
   tbody.innerHTML = filteredRequests.map(request => `
@@ -1172,17 +1173,14 @@ function viewRequestDetails(requestId) {
   showModal(content);
 }
 
-async function acceptRequest(requestId) {
-  try {
-    await api(`/api/requests/${requestId}/status`, 'PATCH', { status: 'Accepted' });
-    await loadRequests();
+function acceptRequest(requestId) {
+  const request = requests.find(r => r.id === requestId);
+  if (request) {
+    request.status = 'Accepted';
     renderRequestsTable();
     showNotification('Request accepted!', 'success');
-  } catch (err) {
-    showNotification('Could not accept request', 'error');
   }
 }
-
 
 function assignStaff(requestId) {
   const request = requests.find(r => r.id === requestId);
@@ -1212,40 +1210,46 @@ function assignStaff(requestId) {
   showModal(content);
 }
 
-async function confirmAssignment(requestId) {
-  const driverName = document.getElementById('assignDriver').value || null;
-  const mechanicName = document.getElementById('assignMechanic').value || null;
-  try {
-    await api(`/api/requests/${requestId}/status`, 'PATCH', {
-      assignedDriver: driverName,
-      assignedMechanic: mechanicName,
-      status: (driverName || mechanicName) ? 'In Progress' : undefined
-    });
-    hideModal();
-    await loadRequests();
-    renderRequestsTable();
-    showNotification('Staff assigned successfully!', 'success');
-  } catch (err) {
-    showNotification('Assignment failed', 'error');
+function confirmAssignment(requestId) {
+  const request = requests.find(r => r.id === requestId);
+  const driverName = document.getElementById('assignDriver').value;
+  const mechanicName = document.getElementById('assignMechanic').value;
+
+  if (driverName) {
+    request.assignedDriver = driverName;
+    const driver = staff.find(s => s.name === driverName);
+    if (driver) driver.available = false;
   }
+
+  if (mechanicName) {
+    request.assignedMechanic = mechanicName;
+    const mechanic = staff.find(s => s.name === mechanicName);
+    if (mechanic) mechanic.available = false;
+  }
+
+  if (driverName || mechanicName) {
+    request.status = 'In Progress';
+  }
+
+  hideModal();
+  renderRequestsTable();
+  showNotification('Staff assigned successfully!', 'success');
 }
 
+function completeRequest(requestId) {
+  const request = requests.find(r => r.id === requestId);
+  if (request) {
+    request.status = 'Completed';
 
-async function completeRequest(requestId) {
-  try {
-    // mark completed
-    await api(`/api/requests/${requestId}/status`, 'PATCH', { status: 'Completed' });
-
-    // generate bill on server
-    const bill = await api(`/api/bills/generate/${requestId}`, 'POST');
-
-    await loadRequests();
-    renderRequestsTable();
-    showNotification('Request completed and bill generated!', 'success');
-  } catch (err) {
-    showNotification('Failed to complete request', 'error');
-  }
-
+    // Free up staff
+    if (request.assignedDriver) {
+      const driver = staff.find(s => s.name === request.assignedDriver);
+      if (driver) driver.available = true;
+    }
+    if (request.assignedMechanic) {
+      const mechanic = staff.find(s => s.name === request.assignedMechanic);
+      if (mechanic) mechanic.available = true;
+    }
 
     // Auto-generate bill
     const baseAmount = Math.floor(Math.random() * 3000) + 500;
@@ -1272,17 +1276,25 @@ async function completeRequest(requestId) {
   }
 }
 
-async function cancelRequest(requestId) {
-  try {
-    await api(`/api/requests/${requestId}/status`, 'PATCH', { status: 'Cancelled' });
-    await loadRequests();
+function cancelRequest(requestId) {
+  const request = requests.find(r => r.id === requestId);
+  if (request) {
+    request.status = 'Cancelled';
+
+    // Free up staff
+    if (request.assignedDriver) {
+      const driver = staff.find(s => s.name === request.assignedDriver);
+      if (driver) driver.available = true;
+    }
+    if (request.assignedMechanic) {
+      const mechanic = staff.find(s => s.name === request.assignedMechanic);
+      if (mechanic) mechanic.available = true;
+    }
+
     renderRequestsTable();
     showNotification('Request cancelled!', 'warning');
-  } catch (err) {
-    showNotification('Failed to cancel', 'error');
   }
 }
-
 
 function renderStaffTables() {
   const drivers = staff.filter(s => s.type === 'Driver');
